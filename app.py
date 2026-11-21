@@ -34,7 +34,15 @@ st.caption("Researcher → Writer, sequential process (crewai 1.15.44)")
 # Password gate, fail-closed: with no APP_PASSWORD configured, nobody can run the crew.
 expected = secret("APP_PASSWORD")
 if not expected:
-    st.error("APP_PASSWORD is not configured, so running is disabled.")
+    try:
+        visible = sorted(st.secrets.keys())
+    except Exception:
+        visible = []
+    st.error(
+        "APP_PASSWORD is not configured, so running is disabled.\n\n"
+        f"Secret names this app can see: {', '.join(visible) or 'none'}.\n\n"
+        "Fix: app menu (⋮) → Settings → Secrets → paste the secrets block → Save."
+    )
     st.stop()
 password = st.text_input("Password", type="password")
 authorized = bool(password) and hmac.compare_digest(password.encode(), expected.encode())
