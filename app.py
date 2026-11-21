@@ -34,13 +34,24 @@ st.caption("Researcher → Writer, sequential process (crewai 1.15.44)")
 # Password gate, fail-closed: with no APP_PASSWORD configured, nobody can run the crew.
 expected = secret("APP_PASSWORD")
 if not expected:
+    # Diagnose without revealing values: missing vs. unparseable vs. key absent.
     try:
         visible = sorted(st.secrets.keys())
-    except Exception:
-        visible = []
+        status = (f"Secret names this app can see: {', '.join(visible)}."
+                  if visible else "The Secrets box is saved but empty.")
+    except Exception as e:
+        msg = str(e)
+        if "Error parsing" in msg:
+            import re
+            where = re.search(r"line \d+, column \d+", msg)
+            status = ("Secrets were saved but are not valid TOML"
+                      + (f" (problem at {where.group(0)})" if where else "")
+                      + ". Each line must look like NAME = \"value\", with no ``` fences.")
+        else:
+            status = "No secrets have been saved for this app."
     st.error(
         "APP_PASSWORD is not configured, so running is disabled.\n\n"
-        f"Secret names this app can see: {', '.join(visible) or 'none'}.\n\n"
+        f"{status}\n\n"
         "Fix: app menu (⋮) → Settings → Secrets → paste the secrets block → Save."
     )
     st.stop()
