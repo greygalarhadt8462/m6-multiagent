@@ -90,6 +90,24 @@ def run_crew(question, status):
     return triage, reply, log, True
 
 
+def error_hint(log):
+    """Pull the API error out of a failed run and say which setting to check."""
+    err = log.split("=== ERROR ===", 1)[1].strip() if "=== ERROR ===" in log else ""
+    if not err:
+        codes = re.findall(r"Error code: \d+ - .{0,300}", log)
+        err = codes[-1] if codes else "No error message found; see the agent log below."
+    low = err.lower()
+    if "api key" in low or "401" in low or "403" in low or "unauthori" in low:
+        hint = "Check **LLM_API_KEY** in Secrets (and that it belongs to the provider in LLM_BASE_URL)."
+    elif "model" in low or "404" in low:
+        hint = "Check **LLM_MODEL** in Secrets: just the model name, e.g. `gemini-3.5-flash-lite`."
+    elif "429" in low or "quota" in low or "rate" in low:
+        hint = "The provider's rate limit or quota was hit. Wait a minute and try again."
+    else:
+        hint = "Check the three LLM_* values in Secrets."
+    return f"**API error:** `{err[:400]}`\n\n{hint}"
+
+
 def urgency_of(triage):
     m = re.search(r"URGENCY:\s*(EMERGENCY|URGENT|ROUTINE)", triage)
     return m.group(1) if m else None
@@ -106,6 +124,7 @@ def show_answer(msg):
         st.markdown(msg["reply"])
     else:
         st.error("Sorry, the assistant couldn't answer just now. Please call 6123 4567.")
+        st.warning(error_hint(msg["log"]))
     with st.expander("Behind the scenes: agent log"):
         st.code(msg["log"], language=None)
 

@@ -26,9 +26,14 @@ from crew import ClinicPortalCrew  # noqa: E402
 
 if __name__ == "__main__":
     query = " ".join(sys.argv[1:]).strip() or "What are your opening hours on Saturday?"
-    result = ClinicPortalCrew().crew().kickoff(
-        inputs={"query": query, "today": clinic_today().strftime("%A %d %B %Y, %H:%M")}
-    )
+    try:
+        result = ClinicPortalCrew().crew().kickoff(
+            inputs={"query": query, "today": clinic_today().strftime("%A %d %B %Y, %H:%M")}
+        )
+    except Exception as e:  # one readable line for app.py instead of a long traceback
+        print("\n=== ERROR ===")
+        print(f"{type(e).__name__}: {' '.join(str(e).split())[:600]}")
+        sys.exit(1)
     # Markers parsed by app.py
     print("\n=== TRIAGE ===")
     print(result.tasks_output[0].raw)
