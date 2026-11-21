@@ -6,6 +6,7 @@ LLM settings: LLM_BASE_URL / LLM_API_KEY / LLM_MODEL from env, .env, or Streamli
 Agent spec cards are read from config/agents.yaml and config/tasks.yaml.
 """
 
+import ast
 import os
 import re
 import subprocess
@@ -189,7 +190,10 @@ with chat_tab:
 with spec_tab:
     agents = yaml.safe_load((HERE / "config/agents.yaml").read_text())
     tasks = yaml.safe_load((HERE / "config/tasks.yaml").read_text())
-    import clinic_tools  # tool descriptions for the cards
+    # Tool descriptions = docstrings in clinic_tools.py, read without importing crewai (slow).
+    tree = ast.parse((HERE / "clinic_tools.py").read_text())
+    tool_docs = {f.name: " ".join((ast.get_docstring(f) or "").split())
+                 for f in tree.body if isinstance(f, ast.FunctionDef)}
 
     st.caption("Source of truth: `config/agents.yaml` + `config/tasks.yaml` (standard CrewAI "
                "config, loaded by `@CrewBase` in `crew.py`). Agents run top to bottom.")
@@ -204,7 +208,7 @@ with spec_tab:
             st.markdown(f"**b) Objective and inputs**  \n_Goal:_ {a['goal'].strip()}")
             st.markdown(t["description"].strip())
             tools = a.get("tools") or []
-            tool_lines = [f"- `{name}`: {' '.join(getattr(clinic_tools, name).description.split()).split('. ')[0]}."
+            tool_lines = [f"- `{name}`: {tool_docs.get(name, '').split('. ')[0].rstrip('.')}."
                           for name in tools]
             st.markdown("**c) Tools**  \n" + ("\n".join(tool_lines) if tools
                         else "None. Works only from the other agents' results."))
