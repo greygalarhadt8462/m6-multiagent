@@ -5,7 +5,6 @@ can be streamed line by line into the page while it runs.
 LLM settings: LLM_BASE_URL / LLM_API_KEY / LLM_MODEL from env, .env, or Streamlit secrets.
 """
 
-import hmac
 import os
 import subprocess
 import sys
@@ -31,9 +30,9 @@ st.set_page_config(page_title="CrewAI Two-Agent Demo", page_icon="🤖")
 st.title("CrewAI two-agent demo")
 st.caption("Researcher → Writer, sequential process (crewai 1.15.44)")
 
-# Password gate, fail-closed: with no APP_PASSWORD configured, nobody can run the crew.
-expected = secret("APP_PASSWORD")
-if not expected:
+# Setup check: the crew needs the three LLM_* settings (Streamlit secrets or .env).
+missing = [k for k in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL") if not secret(k)]
+if missing:
     # Diagnose without revealing values: missing vs. unparseable vs. key absent.
     try:
         visible = sorted(st.secrets.keys())
@@ -50,19 +49,15 @@ if not expected:
         else:
             status = "No secrets have been saved for this app."
     st.error(
-        "APP_PASSWORD is not configured, so running is disabled.\n\n"
+        f"LLM settings missing: {', '.join(missing)}, so running is disabled.\n\n"
         f"{status}\n\n"
         "Fix: app menu (⋮) → Settings → Secrets → paste the secrets block → Save."
     )
     st.stop()
-password = st.text_input("Password", type="password")
-authorized = bool(password) and hmac.compare_digest(password.encode(), expected.encode())
-if password and not authorized:
-    st.warning("Wrong password.")
 
 topic = st.text_input("Topic", "multi-agent systems", max_chars=100)
 
-if st.button("Run crew", type="primary", disabled=not (authorized and topic.strip())):
+if st.button("Run crew", type="primary", disabled=not topic.strip()):
     env = {**os.environ, "PYTHONUNBUFFERED": "1", "COLUMNS": "100",
            "CREWAI_TRACING_ENABLED": "false", "CREWAI_DISABLE_TELEMETRY": "true",
            "OTEL_SDK_DISABLED": "true"}
