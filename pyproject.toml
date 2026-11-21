@@ -1,7 +1,7 @@
 [project]
 name = "m6-multiagent"
 version = "0.1.0"
-description = "Minimal two-agent sequential CrewAI crew"
+description = "Clinic patient portal answered by a four-agent CrewAI crew"
 requires-python = ">=3.10,<3.14"
 dependencies = [
     "crewai==1.15.44",

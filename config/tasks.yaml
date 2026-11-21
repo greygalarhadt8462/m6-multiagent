@@ -1,0 +1,104 @@
+# Agent spec cards, part 2 of 2: one task per agent (sequential process).
+# description = objective + inputs, expected_output = output format, done_when = finish criteria.
+
+triage_task:
+  agent: triage_agent
+  description: >
+    Objective: classify the patient's portal message so the right team members handle it.
+
+    Inputs:
+    - Patient message: "{query}"
+    - Today (clinic time): {today}
+
+    Steps: (1) run the Red Flag Checker on the exact patient message; (2) pick every
+    intent that applies; (3) set urgency, never lower than the checker suggests;
+    (4) decide whether clinic information and/or appointment slots are needed.
+  expected_output: >
+    Exactly five lines, nothing else:
+
+    URGENCY: EMERGENCY | URGENT | ROUTINE
+
+    INTENTS: comma-separated, from clinic_info, appointment, symptoms, prescription, results, billing, other
+
+    NEEDS_CLINIC_INFO: yes | no
+
+    NEEDS_APPOINTMENT: yes | no
+
+    SUMMARY: one neutral sentence restating the request, with no diagnosis
+  done_when: >
+    The Red Flag Checker has been run on the full message, and all five lines are
+    present using only the allowed values.
+
+clinic_info_task:
+  agent: clinic_info_agent
+  context: [triage_task]
+  description: >
+    Objective: collect the clinic facts needed to answer the patient.
+
+    Inputs:
+    - Patient message: "{query}"
+    - Triage result (from context)
+
+    If NEEDS_CLINIC_INFO is "no", reply NOT NEEDED without using tools. Otherwise
+    search the clinic info with focused keywords (at most 3 searches). If urgency is
+    EMERGENCY, also look up the Emergencies section. Leave open appointment times to
+    the Appointment Coordinator; never report them as missing.
+  expected_output: >
+    Either the single line NOT NEEDED, or up to 6 bullet points of facts, each ending
+    with its source as [source: <section title>]. Add a final line
+    NOT FOUND: <what is missing> if part of the question is not covered.
+  done_when: >
+    Every fact comes from a search result and cites its section; nothing is guessed;
+    any gap is stated as NOT FOUND.
+
+appointment_task:
+  agent: appointment_agent
+  context: [triage_task]
+  description: >
+    Objective: offer suitable open appointment slots.
+
+    Inputs:
+    - Patient message: "{query}"
+    - Today (clinic time): {today}
+    - Triage result (from context)
+
+    If NEEDS_APPOINTMENT is "no", reply NOT NEEDED without using tools. If URGENCY is
+    EMERGENCY, reply NOT OFFERED: emergency, without using tools. Otherwise call Find
+    Open Slots with the best-matching service and the patient's preferred day (or "any").
+  expected_output: >
+    Either NOT NEEDED, NOT OFFERED: emergency, or:
+
+    SERVICE: <service matched>
+
+    then up to 3 lines "- <Day DD Mon> <HH:MM> with <Doctor>", copied from the tool,
+
+    then: NOTE: not booked yet; patient confirms in the portal or by phone.
+  done_when: >
+    Every slot is copied exactly from the tool output, no more than 3 are listed, and
+    nothing says the booking is confirmed.
+
+patient_reply_task:
+  agent: reply_agent
+  context: [triage_task, clinic_info_task, appointment_task]
+  description: >
+    Objective: write the final reply shown to the patient in the portal.
+
+    Inputs:
+    - Patient message: "{query}"
+    - Triage, clinic info and appointment results (from context)
+
+    Safety rules: if URGENCY is EMERGENCY, the very first line (before any greeting)
+    tells them to call 995 or go
+    to the nearest A&E now (and SOS on 1767 for thoughts of suicide or self-harm), and
+    nothing else is offered. Never diagnose, never suggest a medicine or dose, and never
+    state a fact that is not in the context. If something is missing, say the care team
+    will follow up or they can call 6123 4567. For symptoms that are not an emergency,
+    suggest seeing a doctor and offer the slots if any were found.
+  expected_output: >
+    A Markdown reply under 170 words: a one-line greeting, a direct answer, a bullet
+    list of any appointment options, one clear next step, and the sign-off
+    "— Maplewood care team (AI assistant)". No headings, no internal labels such as
+    URGENCY or [source: ...].
+  done_when: >
+    It passes the safety rules (emergency advice first when needed, no diagnosis or
+    dosing, every fact traceable to the context) and is under 170 words.

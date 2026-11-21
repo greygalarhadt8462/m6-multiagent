@@ -1,0 +1,35 @@
+{
+  "_note": "Fictional weekly templates. find_open_slots marks some slots as booked deterministically.",
+  "doctors": [
+    {
+      "name": "Dr Aisha Rahman",
+      "services": ["general", "women's health", "health screening", "telehealth"],
+      "weekly": {
+        "Mon": ["09:00", "09:30", "10:00", "10:30", "11:00", "14:30", "15:00", "15:30"],
+        "Wed": ["09:00", "09:30", "10:00", "14:00", "14:30", "15:00", "16:00", "16:30"],
+        "Fri": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+        "Sat": ["09:00", "09:30", "10:00", "10:30"]
+      }
+    },
+    {
+      "name": "Dr Daniel Tan",
+      "services": ["general", "chronic care", "health screening", "minor procedure", "telehealth"],
+      "weekly": {
+        "Mon": ["14:00", "14:30", "15:00", "16:00", "16:30", "17:00"],
+        "Tue": ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"],
+        "Thu": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+        "Sat": ["11:00", "11:30", "12:00"]
+      }
+    },
+    {
+      "name": "Dr Priya Nair",
+      "services": ["general", "child health", "vaccination", "travel", "telehealth"],
+      "weekly": {
+        "Tue": ["14:00", "14:30", "15:00", "15:30", "16:00", "16:30"],
+        "Wed": ["09:30", "10:30", "11:30"],
+        "Thu": ["14:00", "14:30", "15:00", "15:30"],
+        "Fri": ["09:00", "09:30", "10:00", "10:30", "11:00"]
+      }
+    }
+  ]
+}

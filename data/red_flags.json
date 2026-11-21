@@ -1,0 +1,102 @@
+{
+  "_note": "Keyword screen used by the Red Flag Checker tool. A safety net, not a diagnosis.",
+  "EMERGENCY": {
+    "chest pain or pressure": [
+      "chest pain",
+      "chest pressure",
+      "chest tightness",
+      "pain in my chest"
+    ],
+    "breathing difficulty": [
+      "can't breathe",
+      "cannot breathe",
+      "difficulty breathing",
+      "shortness of breath",
+      "short of breath",
+      "struggling to breathe",
+      "choking"
+    ],
+    "stroke signs": [
+      "face drooping",
+      "slurred speech",
+      "one side weak",
+      "weakness on one side",
+      "numb on one side",
+      "stroke"
+    ],
+    "severe bleeding": [
+      "severe bleeding",
+      "won't stop bleeding",
+      "bleeding heavily",
+      "coughing blood",
+      "vomiting blood"
+    ],
+    "loss of consciousness or seizure": [
+      "unconscious",
+      "passed out",
+      "fainted",
+      "seizure",
+      "fitting",
+      "unresponsive"
+    ],
+    "severe allergic reaction": [
+      "throat swelling",
+      "lips swelling",
+      "tongue swelling",
+      "anaphylaxis",
+      "severe allergic reaction"
+    ],
+    "suicide or self-harm": [
+      "suicide",
+      "suicidal",
+      "kill myself",
+      "end my life",
+      "self-harm",
+      "hurt myself",
+      "want to die"
+    ],
+    "overdose or poisoning": [
+      "overdose",
+      "took too many",
+      "poison"
+    ],
+    "serious injury": [
+      "head injury",
+      "hit my head",
+      "broken bone",
+      "deep cut"
+    ]
+  },
+  "URGENT": {
+    "high or persistent fever": [
+      "high fever",
+      "fever for 3 days",
+      "fever for three days",
+      "fever won't go down",
+      "40 degrees",
+      "39 degrees"
+    ],
+    "infant unwell": [
+      "baby has a fever",
+      "baby fever",
+      "infant fever",
+      "newborn fever",
+      "baby is not feeding"
+    ],
+    "pregnancy concern": [
+      "pregnant and bleeding",
+      "pregnancy bleeding",
+      "pregnant and pain"
+    ],
+    "severe pain": [
+      "severe pain",
+      "unbearable pain",
+      "worst headache"
+    ],
+    "dehydration": [
+      "can't keep fluids",
+      "vomiting all day",
+      "not passing urine"
+    ]
+  }
+}
